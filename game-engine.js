@@ -17,6 +17,9 @@ define([
             this.wheel = null;
             this.surfaceWidth = null;
             this.surfaceHeight = null;
+            this.save = null;
+            this.load = null;
+
             // KB input keycodes
             this.controlKeys = {
                 "Space": {"active": false},
@@ -36,11 +39,18 @@ define([
         /*
         Initializes the game engine
         */
-        init (ctx) {
+        init (ctx, save, load) {
+            this.socket = io.connect("http://24.16.255.56:8888");
             this.ctx = ctx;
             this.surfaceWidth = this.ctx.canvas.width;
             this.surfaceHeight = this.ctx.canvas.height;
+            this.save = save;
+            this.load = load;
             this.startInput();
+
+            this.socket.on("connect", function () {
+                console.log("Socket connected.")
+            });
 
             console.log('game initialized');
         }
@@ -114,7 +124,18 @@ define([
 
             }, false);
 
+            this.load.addEventListener("click", function (e) {
+                that.socket.emit('load', {studentname: "Patrick Cruz", statename: "save"});
+            }, false);
+
+
+
             console.log('Input started');
+        }
+
+        //Save the game
+        saveGame() {
+            this.socket.emit('save', {studentname: "Patrick Cruz", statename: "save", savedX: this.entities[0].x, savedY: this.entities[0].y})
         }
 
         /*
@@ -188,7 +209,6 @@ define([
         loop () {
             this.update();
             this.draw();
-            this.click = null;
             this.wheel = null;
         }
 
